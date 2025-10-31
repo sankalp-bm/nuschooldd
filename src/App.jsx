@@ -10,35 +10,42 @@ function App() {
   const [clientName, setClientName] = useState('');
   const [error, setError] = useState(null);
 
-  // --- Fetch Data and Check Local Storage ---
-  useEffect(() => {
-    // Check for saved name on initial load
-    const storedName = localStorage.getItem('clientName');
-    if (storedName && view === 'prompt') {
-        setClientName(storedName);
-        setView('main'); // Auto-navigate if name is found
-    }
+// --- Fetch Data and Check Local Storage ---
+useEffect(() => {
+  // Check for saved name only on initial component mount
+  const storedName = localStorage.getItem('clientName');
+  
+  // If a name is stored, load it and move to the main view
+  if (storedName && view === 'prompt') {
+      setClientName(storedName);
+      setView('main'); 
+      return; // Stop here if we found the name and set the view
+  }
 
-    if (view === 'main') {
-        async function fetchCategories() {
-            let { data, error } = await supabase
-                .from('categories')
-                .select('id, title, lovable_link') // Ensure 'id' is selected for dropdown key
-                .order('id', { ascending: true }); // Order for consistent display
+  // If the current view is 'main' (or we just switched to it), fetch the categories
+  if (view === 'main') {
+      async function fetchCategories() {
+          let { data, error } = await supabase
+              .from('categories')
+              .select('id, title, lovable_link')
+              .order('id', { ascending: true });
 
-            if (error) {
-                console.error('Error fetching categories:', error);
-                setError('Could not load categories. Check Supabase RLS policies.');
-            } else {
-                setCategories(data);
-                if (data.length > 0) {
-                    setSelectedLink(data[0].lovable_link);
-                }
-            }
-        }
-        fetchCategories();
-    }
-  }, [view]);
+          if (error) {
+              console.error('Error fetching categories:', error);
+              // Important: Vercel might struggle with the `console.error` that leads to a blank page.
+              // Setting a simpler error state helps.
+              setError('Could not load categories. Check Supabase RLS policies.');
+          } else {
+              setCategories(data);
+              if (data.length > 0) {
+                  setSelectedLink(data[0].lovable_link);
+              }
+          }
+      }
+      fetchCategories();
+  }
+  // Dependency array: runs every time the 'view' changes
+}, [view]);
 
   const handleNameSubmit = () => {
     if (clientName.trim() !== '') {
