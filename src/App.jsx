@@ -16,24 +16,76 @@ const MenuOverlay = ({ setView, onClose }) => {
         // Note: The main app will automatically re-render due to the CSS variables changing
     };
 
+    const handleShare = async () => {
+        const shareData = {
+            title: 'NU School - Educational Platform',
+            text: 'Check out NU School for amazing learning adventures!',
+            url: window.location.href
+        };
+
+        try {
+            if (navigator.share) {
+                await navigator.share(shareData);
+            } else {
+                // Fallback: Copy to clipboard
+                await navigator.clipboard.writeText(shareData.url);
+                alert('Link copied to clipboard!');
+            }
+        } catch (err) {
+            // User cancelled or error occurred
+            if (err.name !== 'AbortError') {
+                // Fallback: Copy to clipboard
+                navigator.clipboard.writeText(shareData.url).then(() => {
+                    alert('Link copied to clipboard!');
+                });
+            }
+        }
+    };
+
     return (
-        <div className="card-container menu-overlay">
-            <button onClick={onClose} className="back-button">← Back</button>
-            <h2>Need Help?</h2>
+        <div className="card-container menu-overlay" role="dialog" aria-modal="true" aria-labelledby="menu-title">
+            <button 
+                onClick={onClose} 
+                className="back-button"
+                aria-label="Close menu"
+            >
+                ← Back
+            </button>
+            <h2 id="menu-title">Need Help?</h2>
             <p style={{color: '#777', marginBottom: '25px'}}>Choose how you'd like to reach us.</p>
             
             {/* Contact Options (Matching Lovable Image with theme colors) */}
-            <a href="mailto:friend@nuschool.com" className="menu-button menu-button-email">
+            <a 
+                href="mailto:friend@nuschool.com" 
+                className="menu-button menu-button-email"
+                aria-label="Email us"
+            >
                 <span style={{ fontSize: '1.2em' }}>✉️</span> Email Us
             </a>
-            <a href="https://wa.me/917676885989" target="_blank" rel="noopener noreferrer" className="menu-button menu-button-whatsapp">
+            <a 
+                href="https://wa.me/917676885989" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="menu-button menu-button-whatsapp"
+                aria-label="WhatsApp us"
+            >
                 <span style={{ fontSize: '1.2em' }}>💬</span> WhatsApp Us
             </a>
+            
+            {/* Share Button */}
+            <button 
+                onClick={handleShare}
+                className="menu-button menu-button-share"
+                aria-label="Share this page"
+            >
+                <span style={{ fontSize: '1.2em' }}>🔗</span> Share
+            </button>
             
             {/* Admin Login */}
             <button 
                 onClick={() => { setView('admin'); onClose(); }} 
                 className="menu-button menu-button-admin"
+                aria-label="Admin login"
             >
                 <span style={{ fontSize: '1.2em' }}>🔑</span> Admin Login
             </button>
@@ -41,16 +93,19 @@ const MenuOverlay = ({ setView, onClose }) => {
             {/* Theme Switcher - Repositioned and styled differently */}
             <div className="theme-section">
                 <h3>Change Theme ({currentTheme})</h3>
-                <div className="theme-options">
+                <div className="theme-options" role="group" aria-label="Theme selector">
                     {themes.map(themeKey => (
-                        <div 
+                        <button
                             key={themeKey}
+                            type="button"
                             className={`theme-swatch ${themeKey === currentTheme ? 'active' : ''}`}
                             style={{ 
                                 backgroundColor: THEMES[themeKey]['--color-primary'],
                             }}
                             onClick={() => handleThemeChange(themeKey)}
                             title={themeKey}
+                            aria-label={`Switch to ${themeKey} theme`}
+                            aria-pressed={themeKey === currentTheme}
                         />
                     ))}
                 </div>
@@ -78,6 +133,7 @@ const HomeContent = ({ clientName }) => {
                 onClick={() => triggerSuccessFeedback('fireworks')}
                 className="primary-button" 
                 style={{ width: 'auto', padding: '15px 30px', marginTop: '25px' }}
+                aria-label="Test success feedback animation"
             >
                 Test Success Feedback 🎉
             </button>
@@ -96,6 +152,8 @@ function App() {
   const [error, setError] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [themeKey, setThemeKey] = useState(localStorage.getItem('theme') || 'bronze-black');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredCategories, setFilteredCategories] = useState([]);
   
   // Apply theme immediately on load
   useEffect(() => {
@@ -153,6 +211,34 @@ useEffect(() => {
   const handleCategoryChange = (event) => {
     setSelectedLink(event.target.value);
   };
+
+  // Search functionality
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredCategories(categories);
+    } else {
+      const filtered = categories.filter(cat => 
+        cat.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredCategories(filtered);
+    }
+  }, [searchQuery, categories]);
+
+  // Keyboard navigation for accessibility
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // ESC to close menu
+      if (e.key === 'Escape' && isMenuOpen) {
+        setIsMenuOpen(false);
+      }
+      // Alt+M to open menu
+      if (e.altKey && e.key === 'm' && !isMenuOpen) {
+        setIsMenuOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isMenuOpen]);
   
   // --- FINAL RENDER LOGIC (Router) ---
 
@@ -179,7 +265,13 @@ useEffect(() => {
                   placeholder="Enter your name..."
                   className="form-input"
               />
-              <button onClick={handleNameSubmit} className="primary-button">Start Learning!</button>
+              <button 
+                  onClick={handleNameSubmit} 
+                  className="primary-button"
+                  aria-label="Start learning"
+              >
+                  Start Learning!
+              </button>
           </div>
       );
   }
@@ -189,9 +281,9 @@ useEffect(() => {
       // Main App Container uses CSS classes for responsiveness
       <div className="app-container">
           
-          <header className="responsive-header">
+          <header className="responsive-header" role="banner">
               <div className="header-logo">
-                  <img src={nuLogo} alt="NU School Logo" />
+                  <img src={nuLogo} alt="NU School Logo" loading="lazy" />
                   <h2 style={{ margin: 0, fontSize: '1.2em', color: 'var(--color-primary)', fontWeight: '600' }}>NU School</h2>
               </div>
               
@@ -200,6 +292,8 @@ useEffect(() => {
                   onClick={() => setIsMenuOpen(true)} 
                   className="menu-icon"
                   style={{ color: 'var(--color-secondary)' }}
+                  aria-label="Open menu"
+                  aria-expanded={isMenuOpen}
               >
                   ☰
               </button>
@@ -208,8 +302,27 @@ useEffect(() => {
           <div className="main-content">
               
               <div className="category-select-container">
-                  <select onChange={handleCategoryChange} value={selectedLink} className="category-select">
-                      {categories.map((cat) => (
+                  {/* Search Input */}
+                  <div className="search-container">
+                      <input
+                          type="text"
+                          placeholder="Search subjects..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="search-input"
+                          aria-label="Search categories"
+                      />
+                      <span className="search-icon" aria-hidden="true">🔍</span>
+                  </div>
+                  
+                  {/* Dropdown - Shows filtered results if search is active */}
+                  <select 
+                      onChange={handleCategoryChange} 
+                      value={selectedLink} 
+                      className="category-select"
+                      aria-label="Select a category"
+                  >
+                      {(searchQuery.trim() ? filteredCategories : categories).map((cat) => (
                           <option key={cat.id} value={cat.lovable_link}> 
                               {cat.title}
                           </option>
@@ -228,8 +341,9 @@ useEffect(() => {
                           title="Lovable Category Section"
                           className="lovable-iframe"
                           src={selectedLink} 
-                          // Key required for iframe to re-render when src changes
-                          key={selectedLink} 
+                          key={selectedLink}
+                          loading="lazy"
+                          aria-label={`Content for ${categories.find(c => c.lovable_link === selectedLink)?.title || 'selected category'}`}
                       />
                   )}
               </div>
