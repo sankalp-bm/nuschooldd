@@ -7,13 +7,22 @@ import './App.css';
 
 // --- Component 1: Menu Overlay ---
 // This handles the Contact/Themeing/Admin links
-const MenuOverlay = ({ setView, onClose }) => {
+const MenuOverlay = ({ setView, onClose, clientName, setClientName }) => {
     const themes = Object.keys(THEMES);
     const currentTheme = localStorage.getItem('theme') || 'bronze-black';
+    const [nameInput, setNameInput] = useState(clientName);
 
     const handleThemeChange = (themeKey) => {
         applyTheme(themeKey);
         // Note: The main app will automatically re-render due to the CSS variables changing
+    };
+
+    const handleNameChange = () => {
+        if (nameInput.trim() !== '') {
+            localStorage.setItem('clientName', nameInput.trim());
+            setClientName(nameInput.trim());
+            alert('Name updated successfully!');
+        }
     };
 
     const handleShare = async () => {
@@ -43,25 +52,41 @@ const MenuOverlay = ({ setView, onClose }) => {
     };
 
     return (
-        <div className="card-container menu-overlay" role="dialog" aria-modal="true" aria-labelledby="menu-title">
+        <div className="card-container menu-overlay" role="dialog" aria-modal="true">
+            {/* Name Change Input at Top */}
+            <div className="name-change-section">
+                <label htmlFor="name-input" style={{display: 'block', marginBottom: '8px', fontWeight: '500', textAlign: 'left', color: 'var(--color-text-dark)'}}>
+                    Change Name:
+                </label>
+                <div style={{display: 'flex', gap: '8px'}}>
+                    <input
+                        id="name-input"
+                        type="text"
+                        value={nameInput}
+                        onChange={(e) => setNameInput(e.target.value)}
+                        className="form-input"
+                        placeholder="Enter your name"
+                        style={{flex: 1}}
+                    />
+                    <button 
+                        onClick={handleNameChange}
+                        className="name-update-button"
+                        aria-label="Update name"
+                    >
+                        Update
+                    </button>
+                </div>
+            </div>
+
+            {/* Contact Options - Reordered: Share, WhatsApp, Email */}
             <button 
-                onClick={onClose} 
-                className="back-button"
-                aria-label="Close menu"
+                onClick={handleShare}
+                className="menu-button menu-button-share"
+                aria-label="Share this page"
             >
-                ← Back
+                <span style={{ fontSize: '1.2em' }}>🔗</span> Share
             </button>
-            <h2 id="menu-title">Need Help?</h2>
-            <p style={{color: '#777', marginBottom: '25px'}}>Choose how you'd like to reach us.</p>
             
-            {/* Contact Options (Matching Lovable Image with theme colors) */}
-            <a 
-                href="mailto:friend@nuschool.com" 
-                className="menu-button menu-button-email"
-                aria-label="Email us"
-            >
-                <span style={{ fontSize: '1.2em' }}>✉️</span> Email Us
-            </a>
             <a 
                 href="https://wa.me/917676885989" 
                 target="_blank" 
@@ -72,25 +97,15 @@ const MenuOverlay = ({ setView, onClose }) => {
                 <span style={{ fontSize: '1.2em' }}>💬</span> WhatsApp Us
             </a>
             
-            {/* Share Button */}
-            <button 
-                onClick={handleShare}
-                className="menu-button menu-button-share"
-                aria-label="Share this page"
+            <a 
+                href="mailto:friend@nuschool.com" 
+                className="menu-button menu-button-email"
+                aria-label="Email us"
             >
-                <span style={{ fontSize: '1.2em' }}>🔗</span> Share
-            </button>
-            
-            {/* Admin Login */}
-            <button 
-                onClick={() => { setView('admin'); onClose(); }} 
-                className="menu-button menu-button-admin"
-                aria-label="Admin login"
-            >
-                <span style={{ fontSize: '1.2em' }}>🔑</span> Admin Login
-            </button>
+                <span style={{ fontSize: '1.2em' }}>✉️</span> Email Us
+            </a>
 
-            {/* Theme Switcher - Repositioned and styled differently */}
+            {/* Theme Switcher */}
             <div className="theme-section">
                 <h3>Change Theme ({currentTheme})</h3>
                 <div className="theme-options" role="group" aria-label="Theme selector">
@@ -110,6 +125,29 @@ const MenuOverlay = ({ setView, onClose }) => {
                     ))}
                 </div>
             </div>
+
+            {/* Admin Login as Text Link at Bottom */}
+            <div className="admin-link-section">
+                <a 
+                    href="#" 
+                    onClick={(e) => { e.preventDefault(); setView('admin'); onClose(); }} 
+                    className="admin-link"
+                    aria-label="Admin login"
+                >
+                    Admin Login
+                </a>
+            </div>
+
+            {/* Back Button at Bottom Left */}
+            <div className="menu-footer">
+                <button 
+                    onClick={onClose} 
+                    className="back-button-footer"
+                    aria-label="Close menu"
+                >
+                    ← Back
+                </button>
+            </div>
         </div>
     );
 };
@@ -117,27 +155,49 @@ const MenuOverlay = ({ setView, onClose }) => {
 
 // --- Component 2: Home Category Content ---
 const HomeContent = ({ clientName }) => {
+    const audioRef = React.useRef(null);
+
+    const handlePlayRhyme = () => {
+        if (audioRef.current) {
+            audioRef.current.play().catch(err => {
+                console.error('Error playing audio:', err);
+                alert('Unable to play audio. Please try again.');
+            });
+        }
+    };
+
     return (
         <div className="home-card">
-            <h1>Hi, {clientName}! ✋</h1>
-            <p style={{ fontSize: '1.1em', color: '#555', marginBottom: '20px' }}>Welcome to NU School, your learning adventure starts now! 🚀</p>
+            <h1>Hi {clientName}! 👋</h1>
+            <p style={{ fontSize: '1.1em', color: '#555', marginBottom: '20px' }}>
+                Welcome to Buddy's NU School. This app is purely about learning in a fun way.
+            </p>
             
-            <h2>How to Get Started:</h2>
-            <ol>
-                <li>Use the dropdown above to choose a subject you'd like to explore</li>
-                <li>Complete activities and challenges to learn new things</li>
-                <li>Have fun and celebrate your achievements! 🌟</li>
+            <h2>How to get started:</h2>
+            <ol style={{textAlign: 'left', maxWidth: '400px', margin: '0 auto 20px'}}>
+                <li>Select the subject from dropdown above</li>
+                <li>Enjoy the learning & activities</li>
+                <li>Have fun & celebrate your learning</li>
             </ol>
             
+            <p style={{ fontSize: '1em', color: '#555', marginBottom: '25px', fontStyle: 'italic' }}>
+                No Login, No Ads, No Payment :)
+            </p>
+            
+            {/* Hidden Audio Element */}
+            <audio ref={audioRef} preload="auto">
+                <source src="/nu-rhyme.mp3" type="audio/mpeg" />
+                Your browser does not support the audio element.
+            </audio>
+            
             <button 
-                onClick={() => triggerSuccessFeedback('fireworks')}
+                onClick={handlePlayRhyme}
                 className="primary-button" 
-                style={{ width: 'auto', padding: '15px 30px', marginTop: '25px' }}
-                aria-label="Test success feedback animation"
+                style={{ width: 'auto', padding: '15px 30px', marginTop: '10px' }}
+                aria-label="Play NU Rhyme"
             >
-                Test Success Feedback 🎉
+                Play NU Rhyme
             </button>
-            <p style={{ color: '#777', fontSize: '0.9em', marginTop: '10px' }}>*The button above is just for testing the animations!*</p>
         </div>
     );
 };
@@ -152,8 +212,6 @@ function App() {
   const [error, setError] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [themeKey, setThemeKey] = useState(localStorage.getItem('theme') || 'bronze-black');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filteredCategories, setFilteredCategories] = useState([]);
   
   // Apply theme immediately on load
   useEffect(() => {
@@ -212,18 +270,6 @@ useEffect(() => {
     setSelectedLink(event.target.value);
   };
 
-  // Search functionality
-  useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredCategories(categories);
-    } else {
-      const filtered = categories.filter(cat => 
-        cat.title.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilteredCategories(filtered);
-    }
-  }, [searchQuery, categories]);
-
   // Keyboard navigation for accessibility
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -249,7 +295,7 @@ useEffect(() => {
 
   // Show Menu Overlay
   if (isMenuOpen) {
-      return <MenuOverlay setView={setView} onClose={() => setIsMenuOpen(false)} />;
+      return <MenuOverlay setView={setView} onClose={() => setIsMenuOpen(false)} clientName={clientName} setClientName={setClientName} />;
   }
   
   // Show Name Prompt (Initial screen)
@@ -302,27 +348,14 @@ useEffect(() => {
           <div className="main-content">
               
               <div className="category-select-container">
-                  {/* Search Input */}
-                  <div className="search-container">
-                      <input
-                          type="text"
-                          placeholder="Search subjects..."
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          className="search-input"
-                          aria-label="Search categories"
-                      />
-                      <span className="search-icon" aria-hidden="true">🔍</span>
-                  </div>
-                  
-                  {/* Dropdown - Shows filtered results if search is active */}
+                  {/* Dropdown Only - No Search */}
                   <select 
                       onChange={handleCategoryChange} 
                       value={selectedLink} 
                       className="category-select"
                       aria-label="Select a category"
                   >
-                      {(searchQuery.trim() ? filteredCategories : categories).map((cat) => (
+                      {categories.map((cat) => (
                           <option key={cat.id} value={cat.lovable_link}> 
                               {cat.title}
                           </option>

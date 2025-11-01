@@ -98,45 +98,10 @@ body {
   overflow: hidden;
 }
 
-/* Subject/Category Dropdown and Search */
+/* Subject/Category Dropdown Only (No Search) */
 .category-select-container {
   padding: 10px 0;
   flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.search-container {
-  position: relative;
-}
-
-.search-input {
-  width: 100%;
-  padding: 12px 40px 12px 15px;
-  border: 2px solid #e0e0e0;
-  border-radius: var(--border-radius-lg);
-  font-size: 1em;
-  font-family: var(--font-family);
-  background-color: var(--color-card);
-  color: var(--color-text-dark);
-  box-sizing: border-box;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.1);
-}
-
-.search-icon {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--color-secondary);
-  pointer-events: none;
 }
 
 .category-select {
@@ -246,16 +211,40 @@ body {
 
 /* Menu Overlay Styles */
 .menu-overlay {
-  padding: 25px 20px;
+  padding: 25px;
   text-align: center;
 }
 
-.menu-overlay h2 {
-  font-size: 1.5em;
-  margin-bottom: 8px;
-  color: var(--color-text-dark);
+/* Name Change Section */
+.name-change-section {
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
 }
 
+.name-update-button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: var(--border-radius-lg);
+  background-color: var(--color-primary);
+  color: var(--color-text-light);
+  font-family: var(--font-family);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  white-space: nowrap;
+}
+
+.name-update-button:hover {
+  background-color: color-mix(in srgb, var(--color-primary) 85%, black);
+  transform: translateY(-1px);
+}
+
+.name-update-button:active {
+  transform: translateY(0);
+}
+
+/* Menu Buttons - White Background, Black Text, Colored Borders */
 .menu-overlay .menu-button {
   display: flex;
   align-items: center;
@@ -263,17 +252,18 @@ body {
   gap: 12px;
   width: 85%;
   max-width: 350px;
-  margin: 12px auto;
+  margin: 15px auto;
   padding: 16px 20px;
   font-size: 1.1em;
   font-weight: 600;
   font-family: var(--font-family);
   border-radius: var(--border-radius-lg);
-  border: none;
-  color: var(--color-text-light);
+  background-color: var(--color-card) !important;
+  color: var(--color-text-dark) !important;
   cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+  transition: transform 0.15s, box-shadow 0.2s;
   text-decoration: none;
+  border: 2px solid;
   box-shadow: var(--shadow-md);
 }
 
@@ -288,24 +278,70 @@ body {
 
 .menu-overlay .menu-button:hover {
   box-shadow: var(--shadow-lg);
-}
-
-.menu-button-email {
-  background-color: var(--color-primary) !important; /* Bronze/Gold */
-}
-
-.menu-button-whatsapp {
-  background-color: var(--color-secondary) !important; /* Dark Charcoal */
-}
-
-.menu-button-admin {
-  background-color: var(--color-card) !important;
-  color: var(--color-text-dark) !important;
-  border: 2px solid var(--color-secondary) !important;
+  transform: translateY(-1px);
 }
 
 .menu-button-share {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border-color: #FF9933 !important; /* Deep Saffron */
+}
+
+.menu-button-whatsapp {
+  border-color: #FFFFFF !important; /* White */
+}
+
+.menu-button-email {
+  border-color: #008000 !important; /* Green */
+}
+
+/* Admin Link Section */
+.admin-link-section {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+  text-align: center;
+}
+
+.admin-link {
+  color: var(--color-text-dark);
+  text-decoration: none;
+  font-size: 0.9em;
+  transition: color 0.2s;
+}
+
+.admin-link:hover {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+/* Menu Footer with Back Button */
+.menu-footer {
+  margin-top: 20px;
+  padding-top: 15px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.back-button-footer {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1em;
+  color: var(--color-primary);
+  padding: 8px 12px;
+  transition: opacity 0.2s, transform 0.1s;
+  font-family: var(--font-family);
+  font-weight: 500;
+}
+
+.back-button-footer:hover {
+  opacity: 0.7;
+  transform: translateX(-2px);
+}
+
+.back-button-footer:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .theme-section {

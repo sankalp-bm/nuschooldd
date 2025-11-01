@@ -30,6 +30,27 @@ export const THEMES = {
         '--color-text-light': 'white',
         '--color-text-dark': '#333333',
     },
+    'deep-red': {
+        '--color-primary': '#800000', // Deep Red
+        '--color-secondary': '#4A0000', // Darker Red
+        '--color-background': '#FFF5F5',
+        '--color-text-light': 'white',
+        '--color-text-dark': '#333333',
+    },
+    'cadet-blue': {
+        '--color-primary': '#5F9EA0', // Cadet Blue
+        '--color-secondary': '#3D6B6D', // Darker Blue
+        '--color-background': '#F0F8FF',
+        '--color-text-light': 'white',
+        '--color-text-dark': '#333333',
+    },
+    'pure-black': {
+        '--color-primary': '#000000', // Pure Black
+        '--color-secondary': '#333333', // Dark Gray
+        '--color-background': '#F5F5F5',
+        '--color-text-light': 'white',
+        '--color-text-dark': '#333333',
+    },
 };
 
 /**
