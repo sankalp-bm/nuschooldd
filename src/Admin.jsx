@@ -3,7 +3,7 @@ import { supabase } from './supabaseClient';
 import { applyTheme } from './utils';
 
 // Hardcoded Admin Credentials (Using username instead of email for consistency)
-const ADMIN_USERNAME = 'sankalp';
+const ADMIN_USERNAME = 'Sankalp';
 const ADMIN_PASSWORD = 'SankRaj8719';
 
 function Admin({ setView, theme }) {
@@ -112,8 +112,12 @@ function Admin({ setView, theme }) {
     if (!isAuthenticated) {
         return (
             <div className="card-container admin-login-container">
-                <button onClick={() => setView('main')} className="back-button">← Back to Home</button>
                 <div style={{ marginTop: '20px' }}>
+                    {/* Header Text */}
+                    <p style={{ color: '#777', marginBottom: '20px', fontSize: '0.9em', fontStyle: 'italic' }}>
+                        This login is only for internal team
+                    </p>
+                    
                     <div style={{ 
                         width: '60px', 
                         height: '60px', 
@@ -156,6 +160,17 @@ function Admin({ setView, theme }) {
                     <button type="submit" className="primary-button">Log In</button>
                 </form>
                 {loginError && <p style={{ color: 'red', fontWeight: 'bold', marginTop: '10px' }}>{loginError}</p>}
+                
+                {/* Back Button at Bottom Left */}
+                <div className="admin-footer">
+                    <button 
+                        onClick={() => setView('main')} 
+                        className="back-button-footer"
+                        aria-label="Back to home"
+                    >
+                        ← Back to Home
+                    </button>
+                </div>
             </div>
         );
     }

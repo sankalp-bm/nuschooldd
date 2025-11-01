@@ -51,6 +51,8 @@ body {
   box-shadow: var(--shadow-soft);
   flex-shrink: 0; /* Prevents shrinking */
   z-index: 100;
+  position: sticky;
+  top: 0;
 }
 
 .header-logo {
@@ -90,18 +92,26 @@ body {
 /* Main Content Area Styling */
 .main-content {
   padding: 15px;
-  padding-top: 10px; /* Small top padding */
+  padding-top: 0; /* No top padding - dropdown handles its own padding */
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0; /* Critical for flexbox children */
-  overflow: hidden;
+  overflow-y: auto; /* Allow scrolling for content area */
+  overflow-x: hidden;
 }
 
-/* Subject/Category Dropdown Only (No Search) */
+/* Subject/Category Dropdown Only (No Search) - Fixed/Sticky */
 .category-select-container {
-  padding: 10px 0;
+  padding: 10px 15px;
+  padding-bottom: 10px;
   flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  background-color: var(--color-background);
+  z-index: 90;
+  margin-bottom: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .category-select {
@@ -150,13 +160,22 @@ body {
 
 /* --- STANDALONE PAGE STYLES (Prompt, Login, Menu) --- */
 .card-container {
-  padding: 30px 20px;
+  padding: 25px;
   max-width: 450px;
-  margin: 5vh auto;
+  width: calc(100% - 40px);
+  margin: 20px auto;
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-lg);
   background-color: var(--color-card);
   text-align: center;
+  min-height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.menu-overlay {
+  justify-content: space-between;
 }
 
 /* Form Inputs and Buttons */
@@ -222,27 +241,39 @@ body {
   border-bottom: 1px solid #e0e0e0;
 }
 
-.name-update-button {
-  padding: 12px 20px;
-  border: none;
-  border-radius: var(--border-radius-lg);
-  background-color: var(--color-primary);
-  color: var(--color-text-light);
-  font-family: var(--font-family);
+/* Loading Placeholder Animation */
+@keyframes loading-dots {
+  0%, 20% { opacity: 0.3; }
+  50% { opacity: 1; }
+  80%, 100% { opacity: 0.3; }
+}
+
+.loading-placeholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  font-size: 1.5em;
+  color: var(--color-secondary);
+  letter-spacing: 0.3em;
   font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
-  white-space: nowrap;
 }
 
-.name-update-button:hover {
-  background-color: color-mix(in srgb, var(--color-primary) 85%, black);
-  transform: translateY(-1px);
+.loading-placeholder span {
+  animation: loading-dots 1.4s infinite;
 }
 
-.name-update-button:active {
-  transform: translateY(0);
-}
+.loading-placeholder span:nth-child(1) { animation-delay: 0s; }
+.loading-placeholder span:nth-child(2) { animation-delay: 0.2s; }
+.loading-placeholder span:nth-child(3) { animation-delay: 0.4s; }
+.loading-placeholder span:nth-child(4) { animation-delay: 0.6s; }
+.loading-placeholder span:nth-child(5) { animation-delay: 0.8s; }
+.loading-placeholder span:nth-child(6) { animation-delay: 1s; }
+.loading-placeholder span:nth-child(7) { animation-delay: 1.2s; }
+.loading-placeholder span:nth-child(8) { animation-delay: 1.4s; }
+.loading-placeholder span:nth-child(9) { animation-delay: 1.6s; }
+.loading-placeholder span:nth-child(10) { animation-delay: 1.8s; }
+.loading-placeholder span:nth-child(11) { animation-delay: 2s; }
 
 /* Menu Buttons - White Background, Black Text, Colored Borders */
 .menu-overlay .menu-button {
@@ -342,6 +373,14 @@ body {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* Admin Footer */
+.admin-footer {
+  margin-top: auto;
+  padding-top: 20px;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .theme-section {

@@ -11,18 +11,21 @@ const MenuOverlay = ({ setView, onClose, clientName, setClientName }) => {
     const themes = Object.keys(THEMES);
     const currentTheme = localStorage.getItem('theme') || 'bronze-black';
     const [nameInput, setNameInput] = useState(clientName);
+    const [themeLabel, setThemeLabel] = useState(currentTheme);
 
     const handleThemeChange = (themeKey) => {
         applyTheme(themeKey);
+        setThemeLabel(themeKey);
         // Note: The main app will automatically re-render due to the CSS variables changing
     };
 
-    const handleNameChange = () => {
+    // Auto-save name when Back button is clicked
+    const handleBackClick = () => {
         if (nameInput.trim() !== '') {
             localStorage.setItem('clientName', nameInput.trim());
             setClientName(nameInput.trim());
-            alert('Name updated successfully!');
         }
+        onClose();
     };
 
     const handleShare = async () => {
@@ -53,29 +56,19 @@ const MenuOverlay = ({ setView, onClose, clientName, setClientName }) => {
 
     return (
         <div className="card-container menu-overlay" role="dialog" aria-modal="true">
-            {/* Name Change Input at Top */}
+            {/* Name Change Input at Top - No Update Button */}
             <div className="name-change-section">
                 <label htmlFor="name-input" style={{display: 'block', marginBottom: '8px', fontWeight: '500', textAlign: 'left', color: 'var(--color-text-dark)'}}>
                     Change Name:
                 </label>
-                <div style={{display: 'flex', gap: '8px'}}>
-                    <input
-                        id="name-input"
-                        type="text"
-                        value={nameInput}
-                        onChange={(e) => setNameInput(e.target.value)}
-                        className="form-input"
-                        placeholder="Enter your name"
-                        style={{flex: 1}}
-                    />
-                    <button 
-                        onClick={handleNameChange}
-                        className="name-update-button"
-                        aria-label="Update name"
-                    >
-                        Update
-                    </button>
-                </div>
+                <input
+                    id="name-input"
+                    type="text"
+                    value={nameInput}
+                    onChange={(e) => setNameInput(e.target.value)}
+                    className="form-input"
+                    placeholder="Enter your name"
+                />
             </div>
 
             {/* Contact Options - Reordered: Share, WhatsApp, Email */}
@@ -98,7 +91,7 @@ const MenuOverlay = ({ setView, onClose, clientName, setClientName }) => {
             </a>
             
             <a 
-                href="mailto:friend@nuschool.com" 
+                href="mailto:friend@nuschool.org" 
                 className="menu-button menu-button-email"
                 aria-label="Email us"
             >
@@ -107,7 +100,7 @@ const MenuOverlay = ({ setView, onClose, clientName, setClientName }) => {
 
             {/* Theme Switcher */}
             <div className="theme-section">
-                <h3>Change Theme ({currentTheme})</h3>
+                <h3>Change Theme ({themeLabel})</h3>
                 <div className="theme-options" role="group" aria-label="Theme selector">
                     {themes.map(themeKey => (
                         <button
@@ -138,10 +131,10 @@ const MenuOverlay = ({ setView, onClose, clientName, setClientName }) => {
                 </a>
             </div>
 
-            {/* Back Button at Bottom Left */}
+            {/* Back Button at Bottom Left - Auto-saves name */}
             <div className="menu-footer">
                 <button 
-                    onClick={onClose} 
+                    onClick={handleBackClick} 
                     className="back-button-footer"
                     aria-label="Close menu"
                 >
@@ -156,13 +149,37 @@ const MenuOverlay = ({ setView, onClose, clientName, setClientName }) => {
 // --- Component 2: Home Category Content ---
 const HomeContent = ({ clientName }) => {
     const audioRef = React.useRef(null);
+    const [isPlaying, setIsPlaying] = useState(false);
 
-    const handlePlayRhyme = () => {
+    React.useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio) return;
+
+        const handlePlay = () => setIsPlaying(true);
+        const handlePause = () => setIsPlaying(false);
+        const handleEnded = () => setIsPlaying(false);
+
+        audio.addEventListener('play', handlePlay);
+        audio.addEventListener('pause', handlePause);
+        audio.addEventListener('ended', handleEnded);
+
+        return () => {
+            audio.removeEventListener('play', handlePlay);
+            audio.removeEventListener('pause', handlePause);
+            audio.removeEventListener('ended', handleEnded);
+        };
+    }, []);
+
+    const handlePlayPause = () => {
         if (audioRef.current) {
-            audioRef.current.play().catch(err => {
-                console.error('Error playing audio:', err);
-                alert('Unable to play audio. Please try again.');
-            });
+            if (isPlaying) {
+                audioRef.current.pause();
+            } else {
+                audioRef.current.play().catch(err => {
+                    console.error('Error playing audio:', err);
+                    alert('Unable to play audio. Please try again.');
+                });
+            }
         }
     };
 
@@ -191,12 +208,12 @@ const HomeContent = ({ clientName }) => {
             </audio>
             
             <button 
-                onClick={handlePlayRhyme}
+                onClick={handlePlayPause}
                 className="primary-button" 
                 style={{ width: 'auto', padding: '15px 30px', marginTop: '10px' }}
-                aria-label="Play NU Rhyme"
+                aria-label={isPlaying ? "Pause NU Rhyme" : "Play NU Rhyme"}
             >
-                Play NU Rhyme
+                {isPlaying ? '⏸ Pause NU Rhyme' : '▶ Play NU Rhyme'}
             </button>
         </div>
     );
@@ -212,6 +229,7 @@ function App() {
   const [error, setError] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [themeKey, setThemeKey] = useState(localStorage.getItem('theme') || 'bronze-black');
+  const [isLoading, setIsLoading] = useState(true);
   
   // Apply theme immediately on load
   useEffect(() => {
@@ -233,6 +251,7 @@ useEffect(() => {
     // Fetch categories only in main view
     if (view === 'main') {
         async function fetchCategories() {
+            setIsLoading(true);
             let { data, error } = await supabase
                 .from('categories')
                 .select('id, title, lovable_link')
@@ -241,12 +260,14 @@ useEffect(() => {
             if (error) {
                 console.error('Error fetching categories:', error);
                 setError('Could not load categories. Check Supabase RLS policies and Vercel Environment Variables.');
+                setIsLoading(false);
             } else {
                 // Prepend the required Home category
                 const homeCategory = { id: 0, title: "Home", lovable_link: "home" };
                 const allCategories = [homeCategory, ...data];
                 
                 setCategories(allCategories);
+                setIsLoading(false);
                 
                 // If a non-home link was previously selected, default back to home
                 if (selectedLink !== 'home' && selectedLink === '') {
@@ -255,6 +276,8 @@ useEffect(() => {
             }
         }
         fetchCategories();
+    } else {
+        setIsLoading(false);
     }
   }, [view, selectedLink]);
 
@@ -367,7 +390,23 @@ useEffect(() => {
               
               {/* --- Lovable Category Section (Dynamically Renders Home or iFrame) --- */}
               <div className="lovable-section">
-                  {selectedLink === 'home' ? (
+                  {isLoading ? (
+                      <div className="loading-placeholder">
+                          <span>l</span>
+                          <span> </span>
+                          <span>o</span>
+                          <span> </span>
+                          <span>a</span>
+                          <span> </span>
+                          <span>d</span>
+                          <span> </span>
+                          <span>i</span>
+                          <span> </span>
+                          <span>n</span>
+                          <span> </span>
+                          <span>g</span>
+                      </div>
+                  ) : selectedLink === 'home' ? (
                       <HomeContent clientName={clientName} />
                   ) : (
                       <iframe
