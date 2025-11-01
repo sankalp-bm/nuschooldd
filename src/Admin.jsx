@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from './supabaseClient';
 import { applyTheme } from './utils';
 
@@ -6,7 +7,8 @@ import { applyTheme } from './utils';
 const ADMIN_USERNAME = 'Sankalp';
 const ADMIN_PASSWORD = 'SankRaj8719';
 
-function Admin({ setView, theme }) {
+function Admin({ theme }) {
+    const navigate = useNavigate();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [loginUser, setLoginUser] = useState('');
     const [loginPass, setLoginPass] = useState('');
@@ -112,6 +114,15 @@ function Admin({ setView, theme }) {
     if (!isAuthenticated) {
         return (
             <div className="card-container admin-login-container">
+                <button 
+                    onClick={() => navigate('/')} 
+                    className="close-button-menu"
+                    aria-label="Close"
+                    style={{position: 'absolute', top: '15px', right: '15px'}}
+                >
+                    ×
+                </button>
+                
                 <div style={{ marginTop: '20px' }}>
                     {/* Header Text */}
                     <p style={{ color: '#777', marginBottom: '20px', fontSize: '0.9em', fontStyle: 'italic' }}>
@@ -164,7 +175,7 @@ function Admin({ setView, theme }) {
                 {/* Back Button at Bottom Left */}
                 <div className="admin-footer">
                     <button 
-                        onClick={() => setView('main')} 
+                        onClick={() => navigate('/')} 
                         className="back-button-footer"
                         aria-label="Back to home"
                     >
@@ -178,7 +189,7 @@ function Admin({ setView, theme }) {
     // --- Render Admin Management Panel ---
     return (
         <div className="card-container">
-            <button onClick={() => setView('main')} className="back-button">← Back to Main App</button>
+            <button onClick={() => navigate('/')} className="back-button">← Back to Main App</button>
             <h1 style={{ marginBottom: '20px' }}>Admin Management</h1>
 
             {dataError && <p style={{ color: 'red', fontWeight: 'bold' }}>{dataError}</p>}

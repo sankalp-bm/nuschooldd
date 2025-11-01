@@ -67,6 +67,16 @@ body {
   border-radius: 8px;
 }
 
+/* Header Title - Arista 2.0 style (40% larger, rounded font) */
+.header-title {
+  margin: 0;
+  font-size: 1.68em; /* 1.2em * 1.4 = 40% increase */
+  color: var(--color-primary);
+  font-weight: 600;
+  font-family: 'Quicksand', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  letter-spacing: -0.5px;
+}
+
 /* Utility for Icons/Menu Button */
 .menu-icon, .back-button {
   background: none;
@@ -101,7 +111,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Subject/Category Dropdown Only (No Search) - Fixed/Sticky */
+/* Category Selector Container - Fixed/Sticky */
 .category-select-container {
   padding: 10px 15px;
   padding-bottom: 10px;
@@ -114,8 +124,14 @@ body {
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.category-select {
-  width: 100%; 
+/* New Category Selector Component */
+.category-selector-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.category-selector-block {
+  width: 100%;
   padding: 12px 40px 12px 15px;
   border: 2px solid var(--color-primary);
   border-radius: var(--border-radius-lg);
@@ -123,22 +139,129 @@ body {
   font-family: var(--font-family);
   font-weight: 500;
   cursor: pointer;
-  appearance: none;
   background-color: var(--color-card);
   color: var(--color-text-dark);
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="%234A4E69" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>');
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   transition: box-shadow 0.2s;
 }
 
-.category-select:focus {
-  outline: none;
+.category-selector-block:hover {
   box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.1);
 }
 
-/* Lovable Category Section (iFrame Container) */
+.category-selector-block.open {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.selector-label {
+  flex: 1;
+  text-align: left;
+}
+
+.selector-arrow {
+  font-size: 0.8em;
+  transition: transform 0.3s;
+  color: var(--color-secondary);
+}
+
+.selector-arrow.up {
+  transform: rotate(180deg);
+}
+
+.category-selector-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--color-card);
+  border: 2px solid var(--color-primary);
+  border-top: none;
+  border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  max-height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.category-search-container {
+  position: relative;
+  padding: 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.category-search-input {
+  width: 100%;
+  padding: 10px 35px 10px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: var(--border-radius-lg);
+  font-size: 1em;
+  font-family: var(--font-family);
+  background-color: var(--color-card);
+  color: var(--color-text-dark);
+  box-sizing: border-box;
+}
+
+.category-search-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.1);
+}
+
+.category-search-container .search-icon {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-secondary);
+  pointer-events: none;
+  font-size: 1.1em;
+}
+
+.category-prompt {
+  padding: 10px 12px;
+  font-weight: 600;
+  color: var(--color-text-dark);
+  font-size: 0.95em;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.category-list-container {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.category-item {
+  padding: 12px 15px;
+  cursor: pointer;
+  color: var(--color-text-dark);
+  font-size: 1em;
+  transition: background-color 0.2s;
+  text-align: left;
+}
+
+.category-item:hover {
+  background-color: rgba(184, 134, 11, 0.1);
+}
+
+.category-item.selected {
+  background-color: rgba(184, 134, 11, 0.15);
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.category-no-results {
+  padding: 20px;
+  text-align: center;
+  color: #999;
+  font-style: italic;
+}
+
+/* Lovable Category Section (iFrame Container) - Matches category selector width */
 .lovable-section {
   flex: 1;
   min-height: 0; /* Critical for flexbox */
@@ -150,6 +273,9 @@ body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  width: 100%; /* Match category selector width */
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .lovable-iframe {
@@ -228,17 +354,82 @@ body {
   outline-offset: 2px;
 }
 
-/* Menu Overlay Styles */
+/* Menu Overlay Styles with Backdrop */
+.menu-overlay-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+}
+
 .menu-overlay {
   padding: 25px;
   text-align: center;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 999;
+  max-height: 90vh;
+  overflow-y: auto;
+  width: 90%;
+  max-width: 450px;
 }
 
-/* Name Change Section */
+/* Close Button for Popups */
+.close-button-menu {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 2em;
+  color: var(--color-secondary);
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s, transform 0.2s;
+  z-index: 10;
+}
+
+.close-button-menu:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  transform: scale(1.1);
+}
+
+.close-button-menu:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Name Change Section with Saved Notification */
 .name-change-section {
   margin-bottom: 25px;
   padding-bottom: 20px;
   border-bottom: 1px solid #e0e0e0;
+}
+
+.saved-notification {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #22c55e;
+  font-size: 1.2em;
+  font-weight: bold;
+  animation: fadeInOut 2s ease-in-out;
+  min-width: 24px;
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0; transform: scale(0.8); }
+  20%, 80% { opacity: 1; transform: scale(1); }
 }
 
 /* Loading Placeholder Animation */
@@ -275,16 +466,16 @@ body {
 .loading-placeholder span:nth-child(10) { animation-delay: 1.8s; }
 .loading-placeholder span:nth-child(11) { animation-delay: 2s; }
 
-/* Menu Buttons - White Background, Black Text, Colored Borders */
+/* Menu Buttons - White Background, Black Text, Colored Borders - Reduced spacing by 60% */
 .menu-overlay .menu-button {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
-  width: 85%;
-  max-width: 350px;
-  margin: 15px auto;
-  padding: 16px 20px;
+  width: 34%; /* Reduced from 85% by 60% = 34% */
+  max-width: 140px; /* Reduced from 350px by 60% = 140px */
+  margin: 6px auto; /* Reduced from 15px by 60% = 6px */
+  padding: 12px 16px; /* Slightly reduced */
   font-size: 1.1em;
   font-weight: 600;
   font-family: var(--font-family);
@@ -370,6 +561,42 @@ body {
 }
 
 .back-button-footer:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Footer Component - 40% of header size */
+.app-footer {
+  flex-shrink: 0;
+  padding: 4.8px 6px; /* 40% of header padding (12px * 0.4 = 4.8px, 15px * 0.4 = 6px) */
+  background-color: var(--color-card);
+  border-top: 0.8px solid var(--color-primary); /* 40% of header border (2px * 0.4 = 0.8px) */
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  font-size: 0.48em; /* 40% of header font size */
+}
+
+.footer-back-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.72em; /* Scaled appropriately */
+  color: var(--color-primary);
+  padding: 3.2px 4.8px; /* 40% of normal padding */
+  transition: opacity 0.2s, transform 0.1s;
+  font-family: var(--font-family);
+  font-weight: 500;
+}
+
+.footer-back-button:hover {
+  opacity: 0.7;
+  transform: translateX(-2px);
+}
+
+.footer-back-button:focus {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: 4px;
